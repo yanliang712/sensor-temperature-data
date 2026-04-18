@@ -98,10 +98,10 @@ CYCLE_DURATION_MIN = sum(PHASE_DURATIONS)  # 480
 prev_actual = ROOM_TEMP  # exponential-smoothing state
 
 for sample_idx in range(TOTAL_SAMPLES):
-    elapsed_min = (sample_idx + 1) * SAMPLE_INTERVAL_MIN  # 5, 10, … 10080
+    elapsed_min = (sample_idx + 1) * SAMPLE_INTERVAL_MIN  # 5, 10, …, 10080
 
     # Which cycle (0-based) and position within cycle
-    cycle_idx = elapsed_min // CYCLE_DURATION_MIN          # 0 … 21 (edge case at t=10080)
+    cycle_idx = elapsed_min // CYCLE_DURATION_MIN          # 0 … 20 (edge case: 21 at t=10080)
     pos_in_cycle = elapsed_min % CYCLE_DURATION_MIN        # 0 … 479
 
     # Edge case: t=10080 is the boundary of cycle 21 → clamp to last sample of cycle 20
