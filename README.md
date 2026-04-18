@@ -1,2 +1,1 @@
-# sensor-temperature-data
-High-low temperature cycling test data generation
+# High-Low Temperature Cycling Test Data
