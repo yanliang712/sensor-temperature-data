@@ -86,6 +86,9 @@ def temperature_at(t_in_cycle: float) -> tuple[float, int]:
 def generate_data() -> pd.DataFrame:
     total_points = int(TOTAL_DURATION_S // SAMPLE_INTERVAL_S)  # 60 480
 
+    # Timestamps run from SAMPLE_INTERVAL_S to TOTAL_DURATION_S inclusive so
+    # that the last row sits exactly at 168.0 h while keeping exactly 60,480
+    # rows (one per 10-second interval).
     timestamps_s  = np.arange(1, total_points + 1, dtype=np.int64) * SAMPLE_INTERVAL_S
     elapsed_hours = timestamps_s / 3600.0
 
@@ -94,9 +97,12 @@ def generate_data() -> pd.DataFrame:
     phase_numbers = []
 
     for ts in timestamps_s:
-        cycle_idx   = (ts - 1) // CYCLE_DURATION_S           # 0-based
+        # Subtract one interval so the sample taken at the exact cycle
+        # boundary (e.g. ts == CYCLE_DURATION_S) stays in the current cycle
+        # rather than rolling over to the next one.
+        cycle_idx   = (ts - SAMPLE_INTERVAL_S) // CYCLE_DURATION_S   # 0-based
         cycle_num   = int(cycle_idx) + 1
-        t_in_cycle  = ts - cycle_idx * CYCLE_DURATION_S      # offset in current cycle
+        t_in_cycle  = ts - cycle_idx * CYCLE_DURATION_S              # offset in current cycle
 
         temp, phase = temperature_at(float(t_in_cycle))
 
@@ -205,7 +211,8 @@ def export_to_excel(df: pd.DataFrame, path: str = "temperature_cycling_test_data
     cats_ref = Reference(ws_chart, min_col=1, min_row=2, max_row=n_chart)
     chart.set_categories(cats_ref)
     chart.series[0].graphicalProperties.line.solidFill = "2E75B6"
-    chart.series[0].graphicalProperties.line.width = 8000  # EMU
+    # Line width in EMU (English Metric Units); 12,700 EMU = 1 pt; 8,000 ≈ 0.63 pt
+    chart.series[0].graphicalProperties.line.width = 8000
 
     ws_chart.add_chart(chart, "D2")
 
